@@ -1,12 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link } from '@inertiajs/react';
+import { useMenuStore } from '@/Stores/menuStore';
 
 export default function Authenticated({ user, header, children }) {
+    const [menu , setMenu] = useState([]);
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const fetchMenu = async () => {
+        const data = await useMenuStore.getAdminMenu()
+        setMenu(data)
+    } 
+
+    useEffect(() => {
+        fetchMenu()
+    }, [])
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -21,9 +31,15 @@ export default function Authenticated({ user, header, children }) {
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    Dashboard
-                                </NavLink>
+                                {
+                                    menu.map((one) => {
+                                        return (
+                                            <NavLink href={route(one.link)} active={route().current(one.link)}>
+                                                {one.name}
+                                            </NavLink>
+                                        )
+                                    })
+                                }
                             </div>
                         </div>
 
@@ -92,9 +108,15 @@ export default function Authenticated({ user, header, children }) {
 
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
                     <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                            Dashboard
-                        </ResponsiveNavLink>
+                    {
+                        menu.map((one) => {
+                            return (
+                                <ResponsiveNavLink href={route(one.link)} active={route().current(one.link)}>
+                                    {one.name}
+                                </ResponsiveNavLink>
+                            )
+                        })
+                    }
                     </div>
 
                     <div className="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
